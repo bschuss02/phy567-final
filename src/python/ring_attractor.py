@@ -19,7 +19,14 @@ class RingAttractor:
                 fixed_points_number=0,
                 time=1000,
                 plot=False,
-                random_seed=None,):
+                random_seed=None,
+                # my stuff
+                n_exc_syn=4,
+                n_inh_syn=7,
+                global_inh=0,
+                opto_weight=5,
+                opto_stim_begin=50
+                ):
 
         self.n = n
         self.noise = noise
@@ -28,7 +35,19 @@ class RingAttractor:
         self.time = time
         self.plot = plot
         self.random_seed = random_seed
-        self.neurons = [LIF(ID=i, angle=360.0/n*i, noise_mean=0, noise_std=self.noise) for i in range(n)]
+
+        # my stuff
+        self.n_exc_syn = n_exc_syn
+        self.n_inh_syn = n_inh_syn
+        self.global_inh = global_inh
+        self.opto_weight = opto_weight
+        self.opto_stim_begin = opto_stim_begin
+
+        self.neurons = [LIF(ID=i,
+                            angle=360.0/n*i,
+                            noise_mean=0,
+                            noise_std=self.noise,
+                            global_inh=self.global_inh) for i in range(n)]
         self.fp_width = 3
         self.fixed_points = self.get_fixed_points()
         self.mid_point = n // 2
@@ -50,7 +69,7 @@ class RingAttractor:
             # print("\n\nTime = ", t)
             for neuron in self.neurons:
 
-                self.input_source(n_of_spikes=5, begin=100, neuron=neuron, time=t)
+                self.input_source(n_of_spikes=self.opto_weight, begin=self.opto_stim_begin, neuron=neuron, time=t)
                 if t == 0:
                     if neuron.id in range(31, 36):
                         neuron.V = -0.0001
@@ -146,24 +165,25 @@ class RingAttractor:
     def connect_with_fixed_points(self):
         for neur in self.neurons:
             if neur.id in self.fixed_points:
-                for i in range(5, 12):
-                    neur.synapses["inh"][self.neurons[(
-                        neur.id + i) % self.n]] = self.weights[3]
-                    neur.synapses["inh"][self.neurons[neur.id - i]
-                                        ] = self.weights[3]
-                for i in range(1, 5):
-                    neur.synapses["exc"][self.neurons[(
-                        neur.id + i) % self.n]] = self.weights[2]
-                    neur.synapses["exc"][self.neurons[neur.id - i]
-                                        ] = self.weights[2]
+                pass
+                # for i in [0] + list(range(self.n_exc_syn+1, self.n_exc_syn+self.n_inh_syn)):
+                #     neur.synapses["inh"][self.neurons[(
+                #         neur.id + i) % self.n]] = self.weights[3]
+                #     neur.synapses["inh"][self.neurons[neur.id - i]
+                #                         ] = self.weights[3]
+                # for i in range(1, self.n_exc_syn+1):
+                #     neur.synapses["exc"][self.neurons[(
+                #         neur.id + i) % self.n]] = self.weights[2]
+                #     neur.synapses["exc"][self.neurons[neur.id - i]
+                #                         ] = self.weights[2]
 
             else:
-                for i in range(5, 12):
+                for i in range(self.n_exc_syn+1, self.n_exc_syn+self.n_inh_syn):
                     neur.synapses["inh"][self.neurons[(
                         neur.id + i) % self.n]] = self.weights[1]
                     neur.synapses["inh"][self.neurons[neur.id - i]
                                         ] = self.weights[1]
-                for i in range(1, 5):
+                for i in range(1, self.n_exc_syn+1):
                     neur.synapses["exc"][self.neurons[(
                         neur.id + i) % self.n]] = self.weights[0]
                     neur.synapses["exc"][self.neurons[neur.id - i]
@@ -207,27 +227,65 @@ class RingAttractor:
         # print("file", f"images/{datetime.now().strftime('%d-%m-%Y, %H:%M:%S')}.png")
         
         
-        # plt.savefig(
-        #     f"images/{datetime.now().strftime('%d-%m-%Y, %H:%M:%S')}.png")
+        plt.savefig(
+            f"images/{datetime.now().strftime('%d-%m-%Y, %H:%M:%S')}.png")
         plt.show()
 
 
 
 if __name__ == "__main__":
 
-    # np.random.seed(42)
-    # ring = RingAttractor(n=256, noise=2.0e-3, weights=(0.050, 0.100, 0.050, 0.250), fixed_points_number=0, time=500, plot=True, random_seed=42)
-    # error = ring.simulate()
+    params = {
+        'original': {'n': 100,
+                    'noise': 2.0e-3,
+                    'weights': (0.050, 0.100, 0.050, 0.250),
+                    'fixed_points_number': 0,
+                    'time': 500,
+                    'plot': True,
+                    'random_seed': 42,
+                    'n_exc_syn': 4,
+                    'n_inh_syn': 7},
 
-    # ring = RingAttractor(n=64, noise=0e-3, weights=(0.050, 0.100, 0.050, 0.250), fixed_points_number=0, time=100, plot=True, random_seed=None)
+        'stronger': {'n': 100,
+                    'noise': 3.3e-3,
+                    'weights': (0.050, 0.100, 0.050, 0.250),
+                    'fixed_points_number': 0,
+                    'time': 500,
+                    'plot': True,
+                    'random_seed': 42,
+                    'n_exc_syn': 4,
+                    'n_inh_syn': 7,
+                    'opto_weight': 100,
+                    'opto_stim_begin': 100
+                    },
+        
+        'global': { 'n': 100,
+                    'noise': 2.0e-3,
+                    'weights': (0.050, 0.100, 69, 69),
+                    'fixed_points_number': 0,
+                    'time': 500,
+                    'plot': True,
+                    'random_seed': 42,
+                    'n_exc_syn': 4,
+                    'n_inh_syn': 30,
+                    },
 
-    ring = RingAttractor(n=100,
-                        noise=2.0e-3,
-                        weights=(0.050, 0.100, 0.050, 0.250),
-                        fixed_points_number=0,
-                        time=500,
-                        plot=True,
-                        random_seed=42)
+        'local': {  'n': 100,
+                    'noise': 2.0e-3,
+                    'weights': (0.050, 0.100, 69, 69),
+                    'fixed_points_number': 0,
+                    'time': 300,
+                    'plot': True,
+                    'random_seed': 42,
+                    'n_exc_syn': 4,
+                    'n_inh_syn': 0,
+                    'global_inh': 3.5e-9
+                    },
+
+        
+    }
+
+    ring = RingAttractor(**params['stronger'])
+    # ring = RingAttractor(**params['global'])
 
     error = ring.simulate()
-
