@@ -25,7 +25,8 @@ class RingAttractor:
                 n_inh_syn=7,
                 global_inh=0,
                 opto_weight=5,
-                opto_stim_begin=50
+                opto_stim_begin=50,
+                opto_duration=20,
                 ):
 
         self.n = n
@@ -42,6 +43,7 @@ class RingAttractor:
         self.global_inh = global_inh
         self.opto_weight = opto_weight
         self.opto_stim_begin = opto_stim_begin
+        self.opto_duration = opto_duration
 
         self.neurons = [LIF(ID=i,
                             angle=360.0/n*i,
@@ -69,7 +71,7 @@ class RingAttractor:
             # print("\n\nTime = ", t)
             for neuron in self.neurons:
 
-                self.input_source(n_of_spikes=self.opto_weight, begin=self.opto_stim_begin, neuron=neuron, time=t)
+                self.input_source(n_of_spikes=self.opto_weight, begin=self.opto_stim_begin, duration=self.opto_duration, neuron=neuron, time=t)
                 if t == 0:
                     if neuron.id in range(31, 36):
                         neuron.V = -0.0001
@@ -141,7 +143,7 @@ class RingAttractor:
         return divergence
 
 
-    def input_source(self, n_of_spikes, begin, neuron, time):
+    def input_source(self, n_of_spikes, begin, duration, neuron, time):
         sources = [i for i in range(self.mid_point - 2, self.mid_point + 3)]
         if time > begin:
             if neuron.id in sources:
@@ -244,48 +246,39 @@ if __name__ == "__main__":
                     'plot': True,
                     'random_seed': 42,
                     'n_exc_syn': 4,
-                    'n_inh_syn': 7},
-
-        'stronger': {'n': 100,
-                    'noise': 3.3e-3,
-                    'weights': (0.050, 0.100, 0.050, 0.250),
-                    'fixed_points_number': 0,
-                    'time': 500,
-                    'plot': True,
-                    'random_seed': 42,
-                    'n_exc_syn': 4,
                     'n_inh_syn': 7,
-                    'opto_weight': 100,
-                    'opto_stim_begin': 100
+                    'opto_weight': 0
                     },
         
         'global': { 'n': 100,
                     'noise': 2.0e-3,
-                    'weights': (0.050, 0.100, 69, 69),
+                    'weights': (0.030, 0.100, 69, 69),
                     'fixed_points_number': 0,
                     'time': 500,
                     'plot': True,
                     'random_seed': 42,
-                    'n_exc_syn': 4,
-                    'n_inh_syn': 30,
+                    'n_exc_syn': 5,
+                    'n_inh_syn': 10,
+                    'opto_weight': 10
                     },
 
         'local': {  'n': 100,
                     'noise': 2.0e-3,
-                    'weights': (0.050, 0.100, 69, 69),
+                    'weights': (0.065, 0.100, 69, 69),
                     'fixed_points_number': 0,
                     'time': 300,
                     'plot': True,
                     'random_seed': 42,
-                    'n_exc_syn': 4,
+                    'n_exc_syn': 3,
                     'n_inh_syn': 0,
-                    'global_inh': 3.5e-9
+                    'global_inh': 3.5e-9,
+                    'opto_weight': 100,
                     },
 
         
     }
 
-    ring = RingAttractor(**params['stronger'])
+    ring = RingAttractor(**params['local'])
     # ring = RingAttractor(**params['global'])
 
     error = ring.simulate()
