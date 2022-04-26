@@ -45,7 +45,7 @@ class RingAttractor:
         self.opto_weight = opto_weight
         self.opto_stim_begin = opto_stim_begin
         self.opto_duration = opto_duration
-        self.
+        self.stim_width = stim_width
 
         self.neurons = [LIF(ID=i,
                             angle=360.0/n*i,
@@ -146,7 +146,7 @@ class RingAttractor:
 
 
     def input_source(self, n_of_spikes, begin, duration, neuron, time):
-        sources = [i for i in range(self.mid_point - 2, self.mid_point + 3)]
+        sources = [i for i in range(self.mid_point - self.stim_width // 2, self.mid_point + self.stim_width // 2)]
         if time > begin:
             if neuron.id in sources:
                 for _ in range(n_of_spikes):
@@ -274,7 +274,8 @@ if __name__ == "__main__":
                     'n_exc_syn': 3,
                     'n_inh_syn': 0,
                     'global_inh': 3.5e-9,
-                    'opto_weight': 100,
+                    'opto_weight': 50,
+                    'stim_width': 10
                     },
 
         
