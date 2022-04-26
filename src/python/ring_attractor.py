@@ -27,6 +27,7 @@ class RingAttractor:
                 opto_weight=5,
                 opto_stim_begin=50,
                 opto_duration=20,
+                stim_width=7
                 ):
 
         self.n = n
@@ -44,6 +45,7 @@ class RingAttractor:
         self.opto_weight = opto_weight
         self.opto_stim_begin = opto_stim_begin
         self.opto_duration = opto_duration
+        self.
 
         self.neurons = [LIF(ID=i,
                             angle=360.0/n*i,
