@@ -24,10 +24,15 @@ class RingAttractor:
                 n_exc_syn=4,
                 n_inh_syn=7,
                 global_inh=0,
+                opto_starting_point=50,
                 opto_weight=5,
                 opto_stim_begin=50,
                 opto_duration=20,
-                stim_width=7
+                stim_width=7,
+                is_global=False,
+                starting_weight=0,
+                weight_decay=0,
+                max_weight=0
                 ):
 
         self.n = n
@@ -42,10 +47,15 @@ class RingAttractor:
         self.n_exc_syn = n_exc_syn
         self.n_inh_syn = n_inh_syn
         self.global_inh = global_inh
+        self.opto_starting_point = opto_starting_point
         self.opto_weight = opto_weight
         self.opto_stim_begin = opto_stim_begin
         self.opto_duration = opto_duration
         self.stim_width = stim_width
+        self.is_global = is_global
+        self.starting_weight = starting_weight
+        self.weight_decay = weight_decay
+        self.max_weight = max_weight
 
         self.neurons = [LIF(ID=i,
                             angle=360.0/n*i,
@@ -73,7 +83,7 @@ class RingAttractor:
             # print("\n\nTime = ", t)
             for neuron in self.neurons:
 
-                self.input_source(n_of_spikes=self.opto_weight, begin=self.opto_stim_begin, duration=self.opto_duration, neuron=neuron, time=t)
+                self.input_source(n_of_spikes=self.opto_weight, starting_point=self.opto_starting_point, begin=self.opto_stim_begin, duration=self.opto_duration, neuron=neuron, time=t)
                 if t == 0:
                     if neuron.id in range(31, 36):
                         neuron.V = -0.0001
@@ -145,8 +155,10 @@ class RingAttractor:
         return divergence
 
 
-    def input_source(self, n_of_spikes, begin, duration, neuron, time):
-        sources = [i for i in range(self.mid_point - self.stim_width // 2, self.mid_point + self.stim_width // 2)]
+    def input_source(self, starting_point, n_of_spikes, begin, duration, neuron, time):
+        start = (starting_point - self.stim_width // 2) % self.n
+        end = (starting_point + self.stim_width // 2) % self.n
+        sources = [i for i in range(start, end)]
         if time > begin:
             if neuron.id in sources:
                 for _ in range(n_of_spikes):
@@ -168,8 +180,8 @@ class RingAttractor:
 
     def connect_with_fixed_points(self):
         for neur in self.neurons:
-            if neur.id in self.fixed_points:
-                pass
+            # if neur.id in self.fixed_points:
+            #     pass
                 # for i in [0] + list(range(self.n_exc_syn+1, self.n_exc_syn+self.n_inh_syn)):
                 #     neur.synapses["inh"][self.neurons[(
                 #         neur.id + i) % self.n]] = self.weights[3]
@@ -180,9 +192,11 @@ class RingAttractor:
                 #         neur.id + i) % self.n]] = self.weights[2]
                 #     neur.synapses["exc"][self.neurons[neur.id - i]
                 #                         ] = self.weights[2]
-
-            else:
+            # else:
+            if not self.is_global:
                 for i in range(self.n_exc_syn+1, self.n_exc_syn+self.n_inh_syn):
+                    print("self.weights[1]", self.weights[1])
+                    
                     neur.synapses["inh"][self.neurons[(
                         neur.id + i) % self.n]] = self.weights[1]
                     neur.synapses["inh"][self.neurons[neur.id - i]
@@ -192,6 +206,21 @@ class RingAttractor:
                         neur.id + i) % self.n]] = self.weights[0]
                     neur.synapses["exc"][self.neurons[neur.id - i]
                                         ] = self.weights[0]
+            else:
+                w = self.starting_weight
+                for i in range(1, self.n // 2):
+                    x1 = (neur.id + i) % self.n
+                    x2 = (neur.id - i) % self.n
+
+                    if w > 0:
+                        neur.synapses['exc'][self.neurons[x1]] = w
+                        neur.synapses['exc'][self.neurons[x2]] = w
+                    elif w < 0:
+                        neur.synapses['inh'][self.neurons[x1]] = abs(w)
+                        neur.synapses['inh'][self.neurons[x2]] = abs(w)
+                    
+                    if abs(w) < self.max_weight:
+                        w -= self.weight_decay
 
     def get_fixed_points(self):
         if self.fp_n == 0:
@@ -252,6 +281,44 @@ if __name__ == "__main__":
                     'opto_weight': 0
                     },
         
+        # 'global flow': { 'n': 100,
+        #             'noise': 2.0e-3,
+        #             'weights': (0.030, 0.100, 69, 69),
+        #             'fixed_points_number': 0,
+        #             'time': 500,
+        #             'plot': True,
+        #             'random_seed': 42,
+        #             'n_exc_syn': 5,
+        #             'n_inh_syn': 20,
+        #             'opto_weight': 100,
+        #             'opto_stim_begin': 200,
+        #             'opto_starting_point': 55,
+        #             'stim_width': 10,
+        #             'is_global': True,
+        #             'starting_weight': 0.040,
+        #             'weight_decay': 0.005,
+        #             'max_weight': 0.100
+        #             },
+
+        # 'global jump': { 'n': 100,
+        #             'noise': 2.0e-3,
+        #             'weights': (0.030, 0.100, 69, 69),
+        #             'fixed_points_number': 0,
+        #             'time': 500,
+        #             'plot': True,
+        #             'random_seed': 42,
+        #             'n_exc_syn': 5,
+        #             'n_inh_syn': 20,
+        #             'opto_weight': 100,
+        #             'opto_stim_begin': 200,
+        #             'opto_starting_point': 70,
+        #             'stim_width': 20,
+        #             'is_global': True,
+        #             'starting_weight': 0.042,
+        #             'weight_decay': 0.005,
+        #             'max_weight': 0.050
+        #             },
+    
         'global': { 'n': 100,
                     'noise': 2.0e-3,
                     'weights': (0.030, 0.100, 69, 69),
@@ -260,8 +327,15 @@ if __name__ == "__main__":
                     'plot': True,
                     'random_seed': 42,
                     'n_exc_syn': 5,
-                    'n_inh_syn': 10,
-                    'opto_weight': 10
+                    'n_inh_syn': 20,
+                    'opto_weight': 100,
+                    'opto_stim_begin': 200,
+                    'opto_starting_point': 70,
+                    'stim_width': 20,
+                    'is_global': True,
+                    'starting_weight': 0.042,
+                    'weight_decay': 0.005,
+                    'max_weight': 0.050
                     },
 
         'local': {  'n': 100,
@@ -273,15 +347,15 @@ if __name__ == "__main__":
                     'random_seed': 42,
                     'n_exc_syn': 3,
                     'n_inh_syn': 0,
-                    'global_inh': 3.5e-9,
-                    'opto_weight': 50,
-                    'stim_width': 10
+                    'global_inh': 3.05e-9,
+                    'opto_weight': 5,
+                    'stim_width': 15
                     },
 
         
     }
 
-    ring = RingAttractor(**params['local'])
-    # ring = RingAttractor(**params['global'])
+    # ring = RingAttractor(**params['local'])
+    ring = RingAttractor(**params['global'])
 
     error = ring.simulate()
