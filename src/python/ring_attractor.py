@@ -50,7 +50,7 @@ class RingAttractor:
             # print("\n\nTime = ", t)
             for neuron in self.neurons:
 
-                # self.input_source(n_of_spikes=5, begin=0, neuron=neuron, time=t)
+                self.input_source(n_of_spikes=5, begin=100, neuron=neuron, time=t)
                 if t == 0:
                     if neuron.id in range(31, 36):
                         neuron.V = -0.0001
@@ -204,11 +204,11 @@ class RingAttractor:
             self.fp_n, self.noise, self.weights, err, self.random_seed))
 
         print("date", datetime.now().strftime('%d-%m-%Y, %H:%M:%S'))
-        print("file", f"images/{datetime.now().strftime('%d-%m-%Y, %H:%M:%S')}.png")
+        # print("file", f"images/{datetime.now().strftime('%d-%m-%Y, %H:%M:%S')}.png")
         
         
-        plt.savefig(
-            f"images/{datetime.now().strftime('%d-%m-%Y, %H:%M:%S')}.png")
+        # plt.savefig(
+        #     f"images/{datetime.now().strftime('%d-%m-%Y, %H:%M:%S')}.png")
         plt.show()
 
 
@@ -221,6 +221,13 @@ if __name__ == "__main__":
 
     # ring = RingAttractor(n=64, noise=0e-3, weights=(0.050, 0.100, 0.050, 0.250), fixed_points_number=0, time=100, plot=True, random_seed=None)
 
-    ring = RingAttractor(n=100, noise=4.0e-3, weights=(0.050, 0.100, 0.050, 0.250), fixed_points_number=0, time=500, plot=True, random_seed=42)
+    ring = RingAttractor(n=100,
+                        noise=2.0e-3,
+                        weights=(0.050, 0.100, 0.050, 0.250),
+                        fixed_points_number=0,
+                        time=500,
+                        plot=True,
+                        random_seed=42)
+
     error = ring.simulate()
 
