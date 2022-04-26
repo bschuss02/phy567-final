@@ -319,6 +319,25 @@ if __name__ == "__main__":
         #             'max_weight': 0.050
         #             },
     
+        # 'global jump': { 'n': 100,
+        #             'noise': 2.0e-3,
+        #             'weights': (0.030, 0.100, 69, 69),
+        #             'fixed_points_number': 0,
+        #             'time': 500,
+        #             'plot': True,
+        #             'random_seed': 42,
+        #             'n_exc_syn': 5,
+        #             'n_inh_syn': 20,
+        #             'opto_weight': 100,
+        #             'opto_stim_begin': 200,
+        #             'opto_starting_point': 70,
+        #             'stim_width': 20,
+        #             'is_global': True,
+        #             'starting_weight': 0.042,
+        #             'weight_decay': 0.005,
+        #             'max_weight': 0.050
+        #             },
+
         'global': { 'n': 100,
                     'noise': 2.0e-3,
                     'weights': (0.030, 0.100, 69, 69),
@@ -355,7 +374,7 @@ if __name__ == "__main__":
         
     }
 
-    # ring = RingAttractor(**params['local'])
-    ring = RingAttractor(**params['global'])
+    ring = RingAttractor(**params['local'])
+    # ring = RingAttractor(**params['global'])
 
     error = ring.simulate()
