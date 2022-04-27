@@ -60,8 +60,7 @@ class RingAttractor:
         self.neurons = [LIF(ID=i,
                             angle=360.0/n*i,
                             noise_mean=0,
-                            noise_std=self.noise,
-                            global_inh=self.global_inh) for i in range(n)]
+                            noise_std=self.noise) for i in range(n)]
         self.fp_width = 3
         self.fixed_points = self.get_fixed_points()
         self.mid_point = n // 2
@@ -79,16 +78,25 @@ class RingAttractor:
             warnings.warn("Simulation has not been flushed!")
 
         potentials = [[] for _ in range(self.n)]
+        
+        total_activity = []
         for t in tqdm(range(self.time)):
-            # print("\n\nTime = ", t)
+            # print(t, total_activity)
+            total_active_neurons = 0
             for neuron in self.neurons:
+                if neuron.V == 0:
+                    total_active_neurons += 1
 
                 self.input_source(n_of_spikes=self.opto_weight, starting_point=self.opto_starting_point, begin=self.opto_stim_begin, duration=self.opto_duration, neuron=neuron, time=t)
                 if t == 0:
                     if neuron.id in range(31, 36):
                         neuron.V = -0.0001
-                neuron.step()
+                neuron.step(sum(total_activity) * self.global_inh)
                 potentials[neuron.id].append(neuron.V)
+
+            total_activity.append(total_active_neurons)
+            if len(total_activity) > 10:
+                total_activity.pop(0)
 
 
         self.process_potentials(potentials)
@@ -357,6 +365,20 @@ if __name__ == "__main__":
                     'max_weight': 0.050
                     },
 
+        # 'local jump': {  'n': 100,
+        #             'noise': 2.0e-3,
+        #             'weights': (0.065, 0.100, 69, 69),
+        #             'fixed_points_number': 0,
+        #             'time': 300,
+        #             'plot': True,
+        #             'random_seed': 42,
+        #             'n_exc_syn': 3,
+        #             'n_inh_syn': 0,
+        #             'global_inh': 1.0e-9,
+        #             'opto_weight': 5,
+        #             'stim_width': 10
+        #             },
+        
         'local': {  'n': 100,
                     'noise': 2.0e-3,
                     'weights': (0.065, 0.100, 69, 69),
@@ -364,11 +386,12 @@ if __name__ == "__main__":
                     'time': 300,
                     'plot': True,
                     'random_seed': 42,
-                    'n_exc_syn': 3,
+                    'n_exc_syn': 6,
                     'n_inh_syn': 0,
-                    'global_inh': 3.05e-9,
-                    'opto_weight': 5,
-                    'stim_width': 15
+                    'opto_starting_point': 45,
+                    'global_inh': 1.0e-9,
+                    'opto_weight': 10,
+                    'stim_width': 5
                     },
 
         

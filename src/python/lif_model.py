@@ -21,7 +21,7 @@ class LIF:
     El = -70.0 * mV  # Leaky reversal potential
     Vr = -80.0 * mV  # Reset potential
 
-    def __init__(self, ID, angle, dt=1, noise_mean=0, noise_std=1, global_inh=0):
+    def __init__(self, ID, angle, dt=1, noise_mean=0, noise_std=1):
         self.id = ID
         self.Iext = 0.0
         self.V = self.Vr  # Membrane potential, set at reset
@@ -29,9 +29,6 @@ class LIF:
         self.time_from_spike = 200.0 * ms
         self.kexc = 1 / (self.tau_syn_exc * exp(-1))
         self.kinh = 1 / (self.tau_syn_inh * exp(-1))
-
-        # my stuff
-        self.global_inh = global_inh
 
         # outgoing synapses, {neuron: weight}
         self.synapses = {"inh": {}, "exc": {}}
@@ -44,7 +41,7 @@ class LIF:
 
         self.angle = angle
 
-    def step(self):
+    def step(self, global_inh=0):
 
         # If spiked, hyperpolarize
         if self.V == 0.0:
@@ -60,7 +57,7 @@ class LIF:
 
         # Else, update Current with Euler
         else:
-            self.V += self.dV() * self.dt + self.noise()
+            self.V += self.dV(global_inh) * self.dt + self.noise()
 
         # Send time delays to connected neurons
         if self.time_from_spike > self.tau_ref:
@@ -75,11 +72,11 @@ class LIF:
         self.inh_ps_td.clear()
         self.exc_ps_td.clear()
 
-    def dV(self):
+    def dV(self, global_inh):
         # print("\nNeuron ", self.id)
         # print((self.Is_inh() + self.Is_exc())/1e-9)
         
-        return (-self.Il() - self.Is_inh() - self.Is_exc() - self.global_inh) / self.Cm
+        return (-self.Il() - self.Is_inh() - self.Is_exc() - global_inh) / self.Cm
 
     def Il(self):
         return self.Cm / self.tau_m * (self.V - self.El)
