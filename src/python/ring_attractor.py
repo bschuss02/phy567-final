@@ -394,7 +394,22 @@ if __name__ == "__main__":
         #             'stim_width': 5
         #             },
 
-        'local flow?': {  'n': 100,
+        # 'local flow': {  'n': 100,
+        #             'noise': 2.0e-3,
+        #             'weights': (0.065, 0.100, 69, 69),
+        #             'fixed_points_number': 0,
+        #             'time': 300,
+        #             'plot': True,
+        #             'random_seed': 42,
+        #             'n_exc_syn': 6,
+        #             'n_inh_syn': 0,
+        #             'opto_starting_point': 45,
+        #             'global_inh': 1.0e-9,
+        #             'opto_weight': 12,
+        #             'stim_width': 5
+        #             },
+
+        'local flow': {  'n': 100,
                     'noise': 2.0e-3,
                     'weights': (0.065, 0.100, 69, 69),
                     'fixed_points_number': 0,
@@ -405,7 +420,7 @@ if __name__ == "__main__":
                     'n_inh_syn': 0,
                     'opto_starting_point': 45,
                     'global_inh': 1.0e-9,
-                    'opto_weight': 10,
+                    'opto_weight': 12,
                     'stim_width': 5
                     },
 
